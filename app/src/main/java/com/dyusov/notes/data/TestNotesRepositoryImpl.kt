@@ -1,0 +1,73 @@
+package com.dyusov.notes.data
+
+import com.dyusov.notes.domain.Note
+import com.dyusov.notes.domain.NotesRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+
+class TestNotesRepositoryImpl : NotesRepository {
+
+    private val notesListFlow = MutableStateFlow<List<Note>>(listOf())
+
+
+    override fun addNote(note: Note) {
+        notesListFlow.update { // update заменит старую коллекцию на новую
+            it + note // оператор "+" преопределен - создается новая коллекция с элементом
+        }
+    }
+
+    override fun deleteNote(noteId: Int) {
+        notesListFlow.update { oldList ->
+            oldList.toMutableList().apply {
+                removeIf {
+                    it.id == noteId
+                }
+            }
+        }
+    }
+
+    override fun editNote(note: Note) {
+        notesListFlow.update { oldList ->
+            oldList.map {
+                if (it.id == note.id) {
+                    note
+                } else {
+                    note
+                }
+            }
+        }
+    }
+
+    override fun getAllNotes(): Flow<List<Note>> {
+        return notesListFlow.asStateFlow()
+    }
+
+    override fun getNote(noteId: Int): Note {
+        return notesListFlow.value.first { // first найдет первое совпадение по условию
+            it.id == noteId // если элемент не найден, будет брошено исключение
+        }
+    }
+
+    override fun searchNotes(query: String): Flow<List<Note>> {
+        return notesListFlow.map { currentList ->
+            currentList.filter {
+                it.title.contains(query) || it.content.contains(query)
+            }
+        }
+    }
+
+    override fun switchPinStatus(noteId: Int) {
+        notesListFlow.update { oldList ->
+            oldList.map {
+                if (it.id == noteId) {
+                    it.copy(isPinned = !it.isPinned) // меняем на противоположное, используем метод copy() из data class
+                } else {
+                    it
+                }
+            }
+        }
+    }
+}
