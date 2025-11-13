@@ -1,7 +1,9 @@
 package com.dyusov.notes.domain
 
-class DeleteNoteUseCase {
+class DeleteNoteUseCase(
+    private val repository: NotesRepository
+) {
     operator fun invoke(noteId: Int) {
-        TODO()
+        repository.deleteNote(noteId)
     }
 }
