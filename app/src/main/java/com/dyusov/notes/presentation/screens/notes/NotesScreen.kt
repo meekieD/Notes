@@ -1,8 +1,11 @@
 package com.dyusov.notes.presentation.screens.notes
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,8 +26,6 @@ fun NotesScreen(
     val state by viewModel.state.collectAsState() // делегат
     // androidx.compose.runtime.getValue
 
-    val currentState = state
-
     Column(
         modifier = Modifier
             .padding(top = 40.dp)
@@ -34,10 +35,31 @@ fun NotesScreen(
         // обычная функция remember {} - только при рекомпозиции
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        currentState.otherNotes.forEach { note ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            state.pinnedNotes.forEach { note ->
+                Text(
+                    modifier = Modifier.clickable {
+                        viewModel.processCommand(
+                            NotesCommand.SwitchPinnedStatus(note.id)
+                        )
+                    },
+                    text = "${note.title} - ${note.content}",
+                    fontSize = 24.sp
+                )
+            }
+        }
+
+        state.otherNotes.forEach { note ->
             Text(
                 modifier = Modifier.clickable {
-                    viewModel.processCommand(NotesCommand.EditNote(note))
+                    viewModel.processCommand(
+                        NotesCommand.SwitchPinnedStatus(note.id)
+                    )
                 },
                 text = "${note.title} - ${note.content}",
                 fontSize = 24.sp
