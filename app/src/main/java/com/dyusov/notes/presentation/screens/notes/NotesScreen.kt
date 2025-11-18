@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,6 +38,7 @@ import com.dyusov.notes.domain.Note
 import com.dyusov.notes.presentation.ui.theme.OtherNotesColors
 import com.dyusov.notes.presentation.ui.theme.PinnedNotesColors
 import com.dyusov.notes.presentation.ui.theme.Yellow200
+import com.dyusov.notes.presentation.utils.DateFormatter
 
 @Composable
 fun NotesScreen(
@@ -96,6 +99,9 @@ fun NotesScreen(
                     // передаем ключ для связи item и заметки
                     item(key = pinnedNote.id) {
                         NoteCard(
+                            // устанавливаем максимальную ширину
+                            // (если места нужно меньше, элемент займет столько, сколько нужно)
+                            modifier = Modifier.widthIn(max = 160.dp),
                             note = pinnedNote,
                             onNoteClick = {
                                 viewModel.processCommand(
@@ -275,6 +281,8 @@ private fun NoteCard(
     ) {
         // Заголовок заметки
         Text(
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             text = note.title,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurface
@@ -284,7 +292,7 @@ private fun NoteCard(
 
         // Время последнего изменения заметки
         Text(
-            text = note.updatedAt.toString(),
+            text = DateFormatter.formatDateToString(note.updatedAt),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -293,6 +301,8 @@ private fun NoteCard(
 
         // Контент заметки
         Text(
+            maxLines = 3, // ограничение на кол-во строк
+            overflow = TextOverflow.Ellipsis, // стратегия если текст вылез за пределы контейнера (многоточие)
             text = note.content,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
