@@ -4,174 +4,211 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dyusov.notes.R
 import com.dyusov.notes.domain.Note
 import com.dyusov.notes.presentation.ui.theme.OtherNotesColors
 import com.dyusov.notes.presentation.ui.theme.PinnedNotesColors
-import com.dyusov.notes.presentation.ui.theme.Yellow200
 import com.dyusov.notes.presentation.utils.DateFormatter
 
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotesViewModel = viewModel()
+    viewModel: NotesViewModel = viewModel(),
+    onNoteClick: (Note) -> Unit,
+    onAddNoteClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState() // делегат
     // androidx.compose.runtime.getValue
 
-    // Создаем ленивый список (важно не использовать vertical/horizontal scroll!)
-    LazyColumn(
-        modifier = modifier.padding(top = 48.dp)
-    ) {
-        // каждый элемент ленивого списка должен быть вызван внутри функции item
-        item {
-            Title(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                text = "All Notes"
+    // корневой элемент = Scaffold
+
+    Scaffold(
+        modifier = modifier,
+        // кнопка добавления заметки
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddNoteClick,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = CircleShape,
+                // иконка
+                content = {
+                    Icon(
+                        // добавляем локальную иконку
+                        painter = painterResource(R.drawable.ic_add_note),
+                        contentDescription = "Button add note"
+                    )
+                }
             )
         }
+    ) { innerPadding ->
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            SearchBar(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                query = state.query,
+        // Добавляем текст, когда нет ни одной заметки
+        if (state.otherNotes.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                viewModel.processCommand(NotesCommand.InputSearchQuery(it))
+                Text(
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = "No notes found"
+                )
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+        // Создаем ленивый список (важно не использовать vertical/horizontal scroll!)
+        LazyColumn(
+            contentPadding = innerPadding
+        ) {
+            // каждый элемент ленивого списка должен быть вызван внутри функции item
+            item {
+                Title(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    text = "All Notes"
+                )
+            }
 
-        item {
-            Subtitle(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                text = "Pinned"
-            )
-        }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                // отступ пропадает при скролле элементов
-                contentPadding = PaddingValues(horizontal = 24.dp)
-            ) {
-                state.pinnedNotes.forEachIndexed { index, pinnedNote ->
-                    // передаем ключ для связи item и заметки
-                    item(key = pinnedNote.id) {
-                        NoteCard(
-                            // устанавливаем максимальную ширину
-                            // (если места нужно меньше, элемент займет столько, сколько нужно)
-                            modifier = Modifier.widthIn(max = 160.dp),
-                            note = pinnedNote,
-                            onNoteClick = {
-                                viewModel.processCommand(
-                                    NotesCommand.EditNote(pinnedNote)
-                                )
-                            },
-                            onLongNoteClick = {
-                                viewModel.processCommand(
-                                    NotesCommand.SwitchPinnedStatus(pinnedNote.id)
-                                )
-                            },
-                            onDoubleNoteClick = {
-                                viewModel.processCommand(
-                                    NotesCommand.DeleteNote(pinnedNote.id)
-                                )
-                            },
-                            backgroundColor = PinnedNotesColors[index % PinnedNotesColors.size] // цвет заметки
-                        )
-                    }
+            item {
+                SearchBar(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    query = state.query,
+                ) {
+                    viewModel.processCommand(NotesCommand.InputSearchQuery(it))
                 }
             }
-        }
 
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-        }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
-        item {
-            Subtitle(
-                modifier = Modifier.padding(horizontal = 24.dp),
-                text = "Others"
-            )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // также можно использовать функцию itemsIndexed для передачи всей коллекции + индесы
-        itemsIndexed(
-            items = state.otherNotes,
-            /*
-                функция, которая в качестве параметра принимает заметку
-                и возвращает ключ в зависимости от этой заметки
-            */
-            key = { _, note -> note.id }
-        ) { index, otherNote ->
-            NoteCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                note = otherNote,
-                onNoteClick = {
-                    viewModel.processCommand(
-                        NotesCommand.EditNote(otherNote)
+            if (!state.pinnedNotes.isEmpty()) {
+                item {
+                    Subtitle(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        text = "Pinned"
                     )
-                },
-                onLongNoteClick = {
-                    viewModel.processCommand(
-                        NotesCommand.SwitchPinnedStatus(otherNote.id)
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                item {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        // отступ пропадает при скролле элементов
+                        contentPadding = PaddingValues(horizontal = 24.dp)
+                    ) {
+                        state.pinnedNotes.forEachIndexed { index, pinnedNote ->
+                            // передаем ключ для связи item и заметки
+                            item(key = pinnedNote.id) {
+                                NoteCard(
+                                    // устанавливаем максимальную ширину
+                                    // (если места нужно меньше, элемент займет столько, сколько нужно)
+                                    modifier = Modifier.widthIn(max = 160.dp),
+                                    note = pinnedNote,
+                                    // по клику будет переход на другой экран
+                                    // за навигацию будет отвечать другая @Composable функция
+                                    // поэтому передает callback
+                                    onNoteClick = onNoteClick,
+                                    onLongNoteClick = {
+                                        viewModel.processCommand(
+                                            NotesCommand.SwitchPinnedStatus(pinnedNote.id)
+                                        )
+                                    },
+                                    backgroundColor = PinnedNotesColors[index % PinnedNotesColors.size] // цвет заметки
+                                )
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                item {
+                    Subtitle(
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        text = "Others"
                     )
-                },
-                onDoubleNoteClick = {
-                    viewModel.processCommand(
-                        NotesCommand.DeleteNote(otherNote.id)
-                    )
-                },
-                backgroundColor = OtherNotesColors[index % OtherNotesColors.size] // цвет заметки
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            // также можно использовать функцию itemsIndexed для передачи всей коллекции + индесы
+            itemsIndexed(
+                items = state.otherNotes,
+                /*
+                    функция, которая в качестве параметра принимает заметку
+                    и возвращает ключ в зависимости от этой заметки
+                */
+                key = { _, note -> note.id }
+            ) { index, otherNote ->
+                NoteCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    note = otherNote,
+                    // по клику будет переход на другой экран
+                    // за навигацию будет отвечать другая @Composable функция
+                    // поэтому передает callback
+                    onNoteClick = onNoteClick,
+                    onLongNoteClick = {
+                        viewModel.processCommand(
+                            NotesCommand.SwitchPinnedStatus(otherNote.id)
+                        )
+                    },
+                    backgroundColor = OtherNotesColors[index % OtherNotesColors.size] // цвет заметки
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
@@ -257,8 +294,7 @@ private fun NoteCard(
     backgroundColor: Color,
     // используем callback
     onNoteClick: (Note) -> Unit,
-    onLongNoteClick: (Note) -> Unit,
-    onDoubleNoteClick: (Note) -> Unit
+    onLongNoteClick: (Note) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -271,14 +307,11 @@ private fun NoteCard(
                 },
                 onLongClick = {
                     onLongNoteClick(note)
-                },
-                onDoubleClick = {
-                    onDoubleNoteClick(note)
                 }
             )
             .padding(16.dp),
 
-    ) {
+        ) {
         // Заголовок заметки
         Text(
             maxLines = 1,

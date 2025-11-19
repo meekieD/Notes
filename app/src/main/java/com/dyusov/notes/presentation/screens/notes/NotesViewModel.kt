@@ -5,11 +5,7 @@ package com.dyusov.notes.presentation.screens.notes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyusov.notes.data.TestNotesRepositoryImpl
-import com.dyusov.notes.domain.AddNoteUseCase
-import com.dyusov.notes.domain.DeleteNoteUseCase
-import com.dyusov.notes.domain.EditNoteUseCase
 import com.dyusov.notes.domain.GetAllNotesUseCase
-import com.dyusov.notes.domain.GetNoteUseCase
 import com.dyusov.notes.domain.Note
 import com.dyusov.notes.domain.SearchNoteUseCase
 import com.dyusov.notes.domain.SwitchPinnedStatusUseCase
@@ -25,11 +21,7 @@ import kotlinx.coroutines.launch
 class NotesViewModel : ViewModel() {
     private val repository = TestNotesRepositoryImpl // временно нарушаем принцип чистой архитектуры
 
-    private val addNoteUseCase = AddNoteUseCase(repository)
-    private val editNoteUseCase = EditNoteUseCase(repository)
-    private val deleteNoteUseCase = DeleteNoteUseCase(repository)
     private val getAllNotesUseCase = GetAllNotesUseCase(repository)
-    private val getNoteUseCase = GetNoteUseCase(repository)
     private val searchNoteUseCase = SearchNoteUseCase(repository)
     private val switchPinnedStatusUseCase = SwitchPinnedStatusUseCase(repository)
 
@@ -41,7 +33,6 @@ class NotesViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     init {
-        addSomeNotes()
         query
             // обновление состояния экрана
             .onEach { input ->
@@ -64,32 +55,12 @@ class NotesViewModel : ViewModel() {
                 }
             }
             .launchIn(viewModelScope) // особый скоуп viewModel
-            // уничтожается вместе со всеми корутинами при уничтожении ViewModel
-    }
-
-    // todo: temp
-    private fun addSomeNotes() {
-        viewModelScope.launch {
-            repeat(50000) {
-                addNoteUseCase(title = "Title №$it", content = "Content №$it")
-            }
-        }
-
+        // уничтожается вместе со всеми корутинами при уничтожении ViewModel
     }
 
     fun processCommand(command: NotesCommand) {
         viewModelScope.launch {
             when (command) {
-                is NotesCommand.DeleteNote -> {
-                    deleteNoteUseCase(command.noteId)
-                }
-
-                is NotesCommand.EditNote -> {
-                    val note = getNoteUseCase(command.note.id) // todo: temp
-                    val title = note.title
-                    editNoteUseCase(note = command.note.copy(title = "$title edited"))
-                }
-
                 is NotesCommand.InputSearchQuery -> {
                     query.update {
                         command.query.trim()
