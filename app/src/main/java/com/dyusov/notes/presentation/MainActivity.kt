@@ -1,7 +1,6 @@
 package com.dyusov.notes
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.dyusov.notes.presentation.screens.notes.NotesScreen
+import com.dyusov.notes.presentation.screens.navigation.NavGraph
 import com.dyusov.notes.presentation.ui.theme.NotesTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,16 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NotesTheme {
-                NotesScreen(
-                    onNoteClick = {
-                        // логирование для теста
-                        Log.d("MainActivity", "onNoteClick: $it")
-                    },
-                    onAddNoteClick = {
-                        // логирование для теста
-                        Log.d("MainActivity", "onAddNoteButtonClick")
-                    }
-                )
+                NavGraph()
             }
         }
     }
