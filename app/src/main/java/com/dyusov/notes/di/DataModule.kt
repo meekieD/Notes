@@ -1,6 +1,7 @@
 package com.dyusov.notes.di
 
 import android.content.Context
+import com.dyusov.notes.data.NotesDao
 import com.dyusov.notes.data.NotesDatabase
 import com.dyusov.notes.data.NotesRepositoryImpl
 import com.dyusov.notes.domain.NotesRepository
@@ -30,6 +31,14 @@ interface DataModule {
             @ApplicationContext context: Context
         ): NotesDatabase {
             return NotesDatabase.getInstance(context)
+        }
+
+        @Singleton
+        @Provides
+        fun provideNotesDao(
+            database: NotesDatabase
+        ): NotesDao {
+            return database.notesDao()
         }
     }
 }
