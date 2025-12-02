@@ -3,6 +3,7 @@ package com.dyusov.notes.presentation.screens.creation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyusov.notes.domain.AddNoteUseCase
+import com.dyusov.notes.domain.ContentItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,9 +56,10 @@ class CreateNoteViewModel @Inject constructor(
                     _state.update { currentState ->
                         // если состояние создания, вызываем метод UseCase и сохраняем заметку
                         if (currentState is CreateNoteState.Creation) {
+                            val content = ContentItem.Text(content = currentState.content)
                             addNoteUseCase(
                                 title = currentState.title,
-                                content = currentState.content
+                                content = listOf(content)
                             )
                             CreateNoteState.Finished // устанавливаем состояние завершения
                         } else {

@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 // Room создаст за нас БД, поэтому класс абстрактный
 @Database(
     entities = [NoteDbModel::class], // таблицы в БД, требуется список Kotlin классов
-    version = 1,
+    version = 2,
     exportSchema = false // не нужна история версий БД (false)
 )
 abstract class NotesDatabase : RoomDatabase() {
@@ -28,9 +28,10 @@ abstract class NotesDatabase : RoomDatabase() {
                     context = context,
                     klass = NotesDatabase::class.java, // здесь требуется Java класс
                     name = "notes.db"
-                ).build().also {
-                    instance = it // кладем созданный экземпляр БД в переменную instance
-                }
+                ).fallbackToDestructiveMigration(dropAllTables = true).build()
+                    .also {
+                        instance = it // кладем созданный экземпляр БД в переменную instance
+                    }
             }
         }
     }

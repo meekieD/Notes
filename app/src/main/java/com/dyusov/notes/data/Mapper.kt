@@ -35,7 +35,7 @@ fun List<ContentItem>.toContentItemDbModels(): List<ContentItemDbModel> {
                 ContentItemDbModel.Image(url = item.url)
             }
             is ContentItem.Text -> {
-                ContentItemDbModel.Text(content = item.context)
+                ContentItemDbModel.Text(content = item.content)
             }
         }
     }
@@ -48,7 +48,7 @@ fun List<ContentItemDbModel>.toContentItems(): List<ContentItem> {
                 ContentItem.Image(url = item.url)
             }
             is ContentItemDbModel.Text -> {
-                ContentItem.Text(context = item.content)
+                ContentItem.Text(content = item.content)
             }
         }
     }

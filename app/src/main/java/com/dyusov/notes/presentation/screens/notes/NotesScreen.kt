@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dyusov.notes.R
+import com.dyusov.notes.domain.ContentItem
 import com.dyusov.notes.domain.Note
 import com.dyusov.notes.presentation.ui.theme.OtherNotesColors
 import com.dyusov.notes.presentation.ui.theme.PinnedNotesColors
@@ -333,13 +334,18 @@ private fun NoteCard(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Контент заметки
-        Text(
-            maxLines = 3, // ограничение на кол-во строк
-            overflow = TextOverflow.Ellipsis, // стратегия если текст вылез за пределы контейнера (многоточие)
-            text = note.content,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        note.content
+            .filterIsInstance<ContentItem.Text>()
+            .joinToString("\n") { it.content }
+            .let {
+                Text(
+                    maxLines = 3, // ограничение на кол-во строк
+                    overflow = TextOverflow.Ellipsis, // стратегия если текст вылез за пределы контейнера (многоточие)
+                    text = it,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
     }
 }

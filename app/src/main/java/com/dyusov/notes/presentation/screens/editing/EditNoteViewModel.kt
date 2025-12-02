@@ -2,6 +2,7 @@ package com.dyusov.notes.presentation.screens.editing
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dyusov.notes.domain.ContentItem
 import com.dyusov.notes.domain.DeleteNoteUseCase
 import com.dyusov.notes.domain.EditNoteUseCase
 import com.dyusov.notes.domain.GetNoteUseCase
@@ -61,7 +62,8 @@ class EditNoteViewModel @AssistedInject constructor(
                 is EditNoteCommand.InputContent -> {
                     _state.update { currentState ->
                         if (currentState is EditNoteState.Editing) {
-                            val newNote = currentState.note.copy(content = command.content)
+                            val newContent = ContentItem.Text(content = command.content)
+                            val newNote = currentState.note.copy(content = listOf(newContent))
                             currentState.copy(note = newNote)
                         } else {
                             currentState
