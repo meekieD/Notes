@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -36,8 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.dyusov.notes.domain.ContentItem
-import com.dyusov.notes.presentation.screens.TextContent
+import com.dyusov.notes.presentation.screens.NoteContent
 import com.dyusov.notes.presentation.ui.theme.CustomIcons
 import com.dyusov.notes.presentation.utils.DateFormatter
 
@@ -153,38 +151,20 @@ fun CreateNoteScreen(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    LazyColumn(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        // контент заметки
-                        currentState.content.forEachIndexed { index, item ->
-                            item(key = index) {
-                                when (item) {
-                                    is ContentItem.Image -> {
-                                        TextContent(
-                                            text = item.url,
-                                            onTextChanged = {} // todo: temp
-                                        )
-                                    }
-
-                                    is ContentItem.Text -> {
-                                        TextContent(
-                                            text = item.content,
-                                            onTextChanged = { content ->
-                                                viewModel.processCommand(
-                                                    CreateNoteCommand.InputContent(
-                                                        content = content,
-                                                        index = index
-                                                    )
-                                                )
-                                            }
-                                        )
-                                    }
-                                }
-                            }
+                    // контент заметки
+                    NoteContent(
+                        modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
+                        content = currentState.content,
+                        onDeleteImageClick = {},
+                        onTextChanged = { index, content ->
+                            viewModel.processCommand(
+                                CreateNoteCommand.InputContent(
+                                    content = content,
+                                    index = index
+                                )
+                            )
                         }
-                    }
+                    )
                     // кнопка "сохранить"
                     Button(
                         shape = RoundedCornerShape(18.dp),
