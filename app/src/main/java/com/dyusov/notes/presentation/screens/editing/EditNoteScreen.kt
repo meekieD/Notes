@@ -2,6 +2,8 @@
 
 package com.dyusov.notes.presentation.screens.editing
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,10 +36,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.dyusov.notes.domain.ContentItem
-import com.dyusov.notes.presentation.screens.TextContent
+import com.dyusov.notes.presentation.screens.NoteContent
+import com.dyusov.notes.presentation.screens.creation.CreateNoteCommand
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputContent
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputTitle
+import com.dyusov.notes.presentation.ui.theme.CustomIcons
 import com.dyusov.notes.presentation.utils.DateFormatter
 
 @Composable
@@ -53,6 +56,15 @@ fun EditNoteScreen(
 ) {
 
     val state by viewModel.state.collectAsState() // используем делегат
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(), // получение контента
+        onResult = { uri ->
+            uri?.let {
+                viewModel.processCommand(EditNoteCommand.AddImage(uri))
+            }
+        }
+    )
 
     when (val currentState = state) {
         EditNoteState.Initial -> {} // никак не обрабатываем начальное состояние
@@ -84,11 +96,21 @@ fun EditNoteScreen(
                                 contentDescription = "Back to main screen",
                             )
                         },
-                        // кнопка удаления заметки
+                        // кнопка добавить изображение + удаления заметки
                         actions = {
                             Icon(
                                 modifier = Modifier
                                     .padding(end = 16.dp)
+                                    .clickable {
+                                        imagePicker.launch("image/*") // передаем MIME тип
+                                    },
+                                // кастомная иконка
+                                imageVector = CustomIcons.AddPhoto,
+                                contentDescription = "Add photo from gallery",
+                            )
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 24.dp)
                                     .clickable {
                                         viewModel.processCommand(EditNoteCommand.Delete)
                                     },
@@ -148,17 +170,16 @@ fun EditNoteScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     // контент заметки
-                    currentState.note.content.filterIsInstance<ContentItem.Text>()
-                        // filterIsInstance - позволяет фильтровать по типу, будет smart cast
-                        .forEach { item ->
-                            TextContent(
-                                modifier = Modifier.weight(1f),
-                                text = item.content,
-                                onTextChanged = {
-                                    viewModel.processCommand(InputContent(content = it))
-                                }
-                            )
+                    NoteContent(
+                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                        content = currentState.note.content,
+                        onDeleteImageClick = {
+                            viewModel.processCommand(EditNoteCommand.DeleteImage(it))
+                        },
+                        onTextChanged = { _, content ->
+                            viewModel.processCommand(InputContent(content = content))
                         }
+                    )
                     // кнопка "сохранить"
                     Button(
                         shape = RoundedCornerShape(18.dp),

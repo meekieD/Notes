@@ -1,11 +1,15 @@
 package com.dyusov.notes.presentation.screens.editing
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyusov.notes.domain.ContentItem
+import com.dyusov.notes.domain.ContentItem.Image
+import com.dyusov.notes.domain.ContentItem.Text
 import com.dyusov.notes.domain.DeleteNoteUseCase
 import com.dyusov.notes.domain.EditNoteUseCase
 import com.dyusov.notes.domain.GetNoteUseCase
+import com.dyusov.notes.presentation.screens.creation.CreateNoteState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -39,6 +43,7 @@ class EditNoteViewModel @AssistedInject constructor(
         viewModelScope.launch {
             _state.update {
                 val note = getNoteUseCase(noteId) // noteId из конструктора!
+                Log.d("Content", note.content.toString())
                 // устанавливаем состояние редактирования заметки
                 EditNoteState.Editing(note)
             }
@@ -62,7 +67,7 @@ class EditNoteViewModel @AssistedInject constructor(
                 is EditNoteCommand.InputContent -> {
                     _state.update { currentState ->
                         if (currentState is EditNoteState.Editing) {
-                            val newContent = ContentItem.Text(content = command.content)
+                            val newContent = Text(content = command.content)
                             val newNote = currentState.note.copy(content = listOf(newContent))
                             currentState.copy(note = newNote)
                         } else {
@@ -95,6 +100,43 @@ class EditNoteViewModel @AssistedInject constructor(
                             EditNoteState.Finished // устанавливаем состояние завершения
                         } else {
                             currentState // если не в состоянии создания, возвращаем его же
+                        }
+                    }
+                }
+
+                is EditNoteCommand.DeleteImage -> {
+                    _state.update { currentState ->
+                        if (currentState is EditNoteState.Editing) {
+                            val newContent = currentState.note.content.toMutableList().apply {
+                                removeAt(command.index) // удаляем элемент по индексу
+                            }
+                            val newNote = currentState.note.copy(content = newContent)
+                            currentState.copy(note = newNote)
+                        } else {
+                            currentState
+                        }
+                    }
+                }
+
+                is EditNoteCommand.AddImage -> {
+                    _state.update { currentState ->
+                        if (currentState is EditNoteState.Editing) {
+                            // работаем со текущим списком контента
+                            val newContent = currentState.note.content.toMutableList().apply {
+                                val lastContentItem = last()
+                                // удаляем последний элемент, если это пустая строка текста
+                                if (lastContentItem is ContentItem.Text && lastContentItem.content.isBlank()) {
+                                    removeAt(lastIndex)
+                                }
+                                // добавляем изображение
+                                add(Image(command.uri.toString()))
+                                // добавляем пустую строку (чтобы пользователь мог продолжать)
+                                add(Text(""))
+                            }
+                            val newNote = currentState.note.copy(content = newContent)
+                            currentState.copy(note = newNote)
+                        } else {
+                            currentState
                         }
                     }
                 }

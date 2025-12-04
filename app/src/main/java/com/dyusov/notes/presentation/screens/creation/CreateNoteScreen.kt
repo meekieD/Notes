@@ -153,9 +153,13 @@ fun CreateNoteScreen(
                     )
                     // контент заметки
                     NoteContent(
-                        modifier = Modifier.weight(1f).padding(horizontal = 24.dp),
+                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                         content = currentState.content,
-                        onDeleteImageClick = {},
+                        onDeleteImageClick = {
+                            viewModel.processCommand(
+                                CreateNoteCommand.DeleteImage(it)
+                            )
+                        },
                         onTextChanged = { index, content ->
                             viewModel.processCommand(
                                 CreateNoteCommand.InputContent(

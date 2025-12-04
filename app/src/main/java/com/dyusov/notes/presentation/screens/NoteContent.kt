@@ -1,5 +1,6 @@
 package com.dyusov.notes.presentation.screens
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,9 +54,11 @@ fun NoteContent(
                             ?.map { (it as ContentItem.Image).url } // выбираем url
                             ?.let { imageUrls ->
                                 ImageGroup(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
                                     imageUrls = imageUrls,
-                                    onDeleteClick = {
-                                        onDeleteImageClick(index)
+                                    onDeleteClick = {imageIndex ->
+                                        // индекс в общей коллекции + индекс картинки внутри ImageGroup
+                                        onDeleteImageClick(index + imageIndex)
                                     }
                                 )
                             }
@@ -138,9 +141,7 @@ fun TextContent(
     onTextChanged: (String) -> Unit
 ) {
     TextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier = modifier.fillMaxWidth(),
         value = text,
         onValueChange = onTextChanged,
         colors = TextFieldDefaults.colors(

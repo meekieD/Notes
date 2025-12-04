@@ -10,6 +10,8 @@ sealed interface CreateNoteCommand {
 
     data class AddImage(val uri: Uri) : CreateNoteCommand
 
+    data class DeleteImage(val index: Int) : CreateNoteCommand
+
     data object Save : CreateNoteCommand
 
     data object Back : CreateNoteCommand

@@ -1,9 +1,11 @@
 package com.dyusov.notes.presentation.screens.creation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dyusov.notes.domain.AddNoteUseCase
 import com.dyusov.notes.domain.ContentItem
+import com.dyusov.notes.domain.ContentItem.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,6 +63,7 @@ class CreateNoteViewModel @Inject constructor(
                                 // сохраняем либо изображения, либо непустой текст
                                 it !is ContentItem.Text || it.content.isNotBlank()
                             }
+                            Log.d("Content", content.toString())
                             addNoteUseCase(
                                 title = currentState.title,
                                 content = content
@@ -87,9 +90,25 @@ class CreateNoteViewModel @Inject constructor(
                                     removeAt(lastIndex)
                                 }
                                 // добавляем изображение
-                                add(ContentItem.Image(command.uri.toString()))
+                                add(Image(command.uri.toString()))
                                 // добавляем пустую строку (чтобы пользователь мог продолжать)
-                                add(ContentItem.Text(""))
+                                add(Text(""))
+                            }.let {
+                                // обновляем состояние экрана, применяя изменения в контенте
+                                currentState.copy(content = it)
+                            }
+                        } else {
+                            currentState
+                        }
+                    }
+                }
+
+                is CreateNoteCommand.DeleteImage -> {
+                    _state.update { currentState ->
+                        if (currentState is CreateNoteState.Creation) {
+                            // работаем со текущим списком контента
+                            currentState.content.toMutableList().apply {
+                                removeAt(command.index) // удаляем элемент по индексу
                             }.let {
                                 // обновляем состояние экрана, применяя изменения в контенте
                                 currentState.copy(content = it)
