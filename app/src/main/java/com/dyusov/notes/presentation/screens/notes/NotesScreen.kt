@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -94,7 +95,7 @@ fun NotesScreen(
                     fontWeight = FontWeight.Normal,
                     fontSize = 24.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    text = "No notes found"
+                    text = stringResource(R.string.no_notes_found)
                 )
             }
         }
@@ -107,7 +108,7 @@ fun NotesScreen(
             item {
                 Title(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    text = "All Notes"
+                    text = stringResource(R.string.all_notes)
                 )
             }
 
@@ -132,7 +133,7 @@ fun NotesScreen(
                 item {
                     Subtitle(
                         modifier = Modifier.padding(horizontal = 24.dp),
-                        text = "Pinned"
+                        text = stringResource(R.string.pinned)
                     )
                 }
 
@@ -178,7 +179,7 @@ fun NotesScreen(
                 item {
                     Subtitle(
                         modifier = Modifier.padding(horizontal = 24.dp),
-                        text = "Others"
+                        text = stringResource(R.string.others)
                     )
                 }
 
@@ -234,7 +235,8 @@ fun NotesScreen(
                             viewModel.processCommand(
                                 NotesCommand.SwitchPinnedStatus(otherNote.id)
                             )
-                        })
+                        },
+                        backgroundColor = OtherNotesColors[index % OtherNotesColors.size]) // цвет заметки
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
@@ -278,7 +280,7 @@ private fun SearchBar(
         // placeholder: @Composable (() -> Unit)? -> подход Slot API
         placeholder = {
             Text(
-                text = "Search...",
+                text = stringResource(R.string.search),
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -391,6 +393,7 @@ fun NoteCardWithImage(
     modifier: Modifier = Modifier,
     note: Note,
     imageUrl: String,
+    backgroundColor: Color,
     // используем callback
     onNoteClick: (Note) -> Unit,
     onLongNoteClick: (Note) -> Unit
@@ -398,13 +401,7 @@ fun NoteCardWithImage(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            // добавляем градиент - от прозрачного до темного сверху вниз
-            .background(brush = Brush.verticalGradient(
-                listOf(
-                    Color.Transparent,
-                    MaterialTheme.colorScheme.primary
-                )
-            ))
+            .background(backgroundColor)
             // для реагирования на разные виды нажатий/кликов
             .combinedClickable(
                 onClick = {
@@ -428,6 +425,16 @@ fun NoteCardWithImage(
             )
             Column(
                 modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    // добавляем градиент - от прозрачного до темного сверху вниз
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    )
                     .fillMaxWidth()
                     .align(Alignment.BottomStart)
                     .padding(16.dp)

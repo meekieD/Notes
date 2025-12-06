@@ -30,12 +30,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.dyusov.notes.R
 import com.dyusov.notes.presentation.screens.NoteContent
 import com.dyusov.notes.presentation.screens.creation.CreateNoteCommand
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputContent
@@ -78,7 +80,7 @@ fun EditNoteScreen(
                         // заголовок
                         title = {
                             Text(
-                                text = "Edit note",
+                                text = stringResource(R.string.edit_note),
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground
@@ -153,7 +155,7 @@ fun EditNoteScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Title",
+                                text = stringResource(R.string.title),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -171,7 +173,9 @@ fun EditNoteScreen(
                     )
                     // контент заметки
                     NoteContent(
-                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
                         content = currentState.note.content,
                         onDeleteImageClick = {
                             viewModel.processCommand(EditNoteCommand.DeleteImage(it))
@@ -199,7 +203,7 @@ fun EditNoteScreen(
                         Text(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Save note",
+                            text = stringResource(R.string.save_note),
                             fontSize = 16.sp
                         )
                     }

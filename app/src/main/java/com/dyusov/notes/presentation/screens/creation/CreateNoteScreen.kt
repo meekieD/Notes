@@ -29,12 +29,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.dyusov.notes.R
 import com.dyusov.notes.presentation.screens.NoteContent
 import com.dyusov.notes.presentation.ui.theme.CustomIcons
 import com.dyusov.notes.presentation.utils.DateFormatter
@@ -69,7 +71,7 @@ fun CreateNoteScreen(
                         // заголовок
                         title = {
                             Text(
-                                text = "Create note",
+                                text = stringResource(R.string.create_note),
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground
@@ -135,7 +137,7 @@ fun CreateNoteScreen(
                         ),
                         placeholder = {
                             Text(
-                                text = "Title",
+                                text = stringResource(R.string.title),
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -153,7 +155,9 @@ fun CreateNoteScreen(
                     )
                     // контент заметки
                     NoteContent(
-                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
                         content = currentState.content,
                         onDeleteImageClick = {
                             viewModel.processCommand(
@@ -188,7 +192,7 @@ fun CreateNoteScreen(
                         Text(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
-                            text = "Save note",
+                            text = stringResource(R.string.save_note),
                             fontSize = 16.sp
                         )
                     }
