@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.dyusov.notes.R
 import com.dyusov.notes.presentation.screens.NoteContent
-import com.dyusov.notes.presentation.screens.creation.CreateNoteCommand
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputContent
 import com.dyusov.notes.presentation.screens.editing.EditNoteCommand.InputTitle
 import com.dyusov.notes.presentation.ui.theme.CustomIcons
@@ -178,10 +177,17 @@ fun EditNoteScreen(
                             .padding(horizontal = 8.dp),
                         content = currentState.note.content,
                         onDeleteImageClick = {
-                            viewModel.processCommand(EditNoteCommand.DeleteImage(it))
+                            viewModel.processCommand(
+                                EditNoteCommand.DeleteImage(it)
+                            )
                         },
-                        onTextChanged = { _, content ->
-                            viewModel.processCommand(InputContent(content = content))
+                        onTextChanged = { index, content ->
+                            viewModel.processCommand(
+                                InputContent(
+                                    index = index,
+                                    content = content
+                                )
+                            )
                         }
                     )
                     // кнопка "сохранить"

@@ -3,13 +3,11 @@ package com.dyusov.notes.presentation.screens.editing
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dyusov.notes.domain.ContentItem
 import com.dyusov.notes.domain.ContentItem.Image
 import com.dyusov.notes.domain.ContentItem.Text
 import com.dyusov.notes.domain.DeleteNoteUseCase
 import com.dyusov.notes.domain.EditNoteUseCase
 import com.dyusov.notes.domain.GetNoteUseCase
-import com.dyusov.notes.presentation.screens.creation.CreateNoteState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -67,8 +65,12 @@ class EditNoteViewModel @AssistedInject constructor(
                 is EditNoteCommand.InputContent -> {
                     _state.update { currentState ->
                         if (currentState is EditNoteState.Editing) {
-                            val newContent = Text(content = command.content)
-                            val newNote = currentState.note.copy(content = listOf(newContent))
+                            val newText = Text(content = command.content)
+                            val newNote = currentState.note.copy(
+                                content = currentState.note.content.toMutableList().apply {
+                                    this[command.index] = newText
+                                }
+                            )
                             currentState.copy(note = newNote)
                         } else {
                             currentState
@@ -82,7 +84,7 @@ class EditNoteViewModel @AssistedInject constructor(
                             val note = currentState.note
                             val content = note.content.filter {
                                 // сохраняем либо изображения, либо непустой текст
-                                it !is ContentItem.Text || it.content.isNotBlank()
+                                it !is Text || it.content.isNotBlank()
                             }
                             editNoteUseCase(note.copy(content = content))
                             EditNoteState.Finished // устанавливаем состояние завершения
@@ -129,7 +131,7 @@ class EditNoteViewModel @AssistedInject constructor(
                             val newContent = currentState.note.content.toMutableList().apply {
                                 val lastContentItem = last()
                                 // удаляем последний элемент, если это пустая строка текста
-                                if (lastContentItem is ContentItem.Text && lastContentItem.content.isBlank()) {
+                                if (lastContentItem is Text && lastContentItem.content.isBlank()) {
                                     removeAt(lastIndex)
                                 }
                                 // добавляем изображение
