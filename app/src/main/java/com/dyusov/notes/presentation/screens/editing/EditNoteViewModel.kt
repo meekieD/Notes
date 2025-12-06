@@ -80,7 +80,11 @@ class EditNoteViewModel @AssistedInject constructor(
                     _state.update { currentState ->
                         if (currentState is EditNoteState.Editing) {
                             val note = currentState.note
-                            editNoteUseCase(note)
+                            val content = note.content.filter {
+                                // сохраняем либо изображения, либо непустой текст
+                                it !is ContentItem.Text || it.content.isNotBlank()
+                            }
+                            editNoteUseCase(note.copy(content = content))
                             EditNoteState.Finished // устанавливаем состояние завершения
                         } else {
                             currentState // если не в состоянии создания, возвращаем его же
