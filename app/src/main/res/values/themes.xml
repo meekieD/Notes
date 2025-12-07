@@ -2,4 +2,13 @@
 <resources>
 
     <style name="Theme.Notes" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- настройка стиля Splash Screen -->
+    <style name="Theme.Notes.SplashScreen" parent="Theme.SplashScreen">
+        <!-- цвет фона -->
+        <item name="windowSplashScreenBackground">@color/yellow</item>
+        <!-- иконка -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <!-- после показа splash screen нужно сменить тему на стандартную -->
+        <item name="postSplashScreenTheme">@style/Theme.Notes</item>
+    </style>
 </resources>
