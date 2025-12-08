@@ -25,10 +25,8 @@ class NotesRepositoryImpl @Inject constructor(
             updatedAt = updatedAt,
             isPinned = isPinned
         )
-        val noteId = notesDao.addNote(noteDbModel).toInt() // добавляем заметку и получаем id
-
-        val contentItems = processedContent.toContentItemDbModels(noteId)
-        notesDao.addNoteContent(contentItems) // добавляем контент
+        // используем транзакцию
+        notesDao.addNoteWithContent(noteDbModel, processedContent)
     }
 
     override suspend fun deleteNote(noteId: Int) {
@@ -52,11 +50,11 @@ class NotesRepositoryImpl @Inject constructor(
 
         val processedContent = note.content.processForStorage()
         val processedNote = note.copy(content = processedContent)
-
-        notesDao.addNote(processedNote.toDbModel()) // используем ранее созданный маппер
-        // сначала удаляем весь прошлый контент, а затем добавляем новый
-        notesDao.deleteNoteContent(note.id)
-        notesDao.addNoteContent(processedContent.toContentItemDbModels(note.id))
+        // используем транзакцию
+        notesDao.editNoteWithContent(
+            noteDbModel = processedNote.toDbModel(), // используем ранее созданный маппер
+            content = processedContent.toContentItemDbModels(note.id)
+        )
     }
 
     override fun getAllNotes(): Flow<List<Note>> {
