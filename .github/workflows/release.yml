@@ -28,6 +28,9 @@ jobs:
           java-package: 'jdk'
           cache: 'gradle'
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build APK
         run: | 
           ./gradlew assembleRelease
