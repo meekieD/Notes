@@ -28,11 +28,9 @@ jobs:
           java-package: 'jdk'
           cache: 'gradle'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
       - name: Build APK
-        run: | 
+        run: |
+          chmod +x ./gradlew
           ./gradlew assembleRelease
       
       - name: Set up Keystore
@@ -51,7 +49,7 @@ jobs:
             --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
             --key-pass pass:${{ secrets.KEY_PASSWORD }} \
             --out app-release.apk \
-            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
