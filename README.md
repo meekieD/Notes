@@ -16,7 +16,6 @@ This is a personal learning project to explore modern Android development practi
 - Organize notes with automatic timestamps
 - Clean and intuitive Material Design UI
 - Offline-first with local Room database storage
-- Responsive design for various screen sizes
 
 ## Tech Stack
 
