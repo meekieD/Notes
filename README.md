@@ -100,8 +100,8 @@ This project serves as a learning platform for:
 
 ## Future Improvements
 
-- Implement note categories/tags
-- Dark mode theme toggle
-- Widget for quick note access
-- Export notes to PDF or other formats
-- Improve test coverage for all layers
+- [ ] Implement note categories/tags
+- [ ] Dark mode theme toggle
+- [ ] Widget for quick note access
+- [ ] Export notes to PDF or other formats
+- [ ] Improve test coverage for all layers
